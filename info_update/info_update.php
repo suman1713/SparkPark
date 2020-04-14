@@ -1,35 +1,48 @@
-<?php require('includes/config.php'); 
-
-//if not logged in redirect to login page
-if (! $user->is_logged_in()){
-    header('Location: login.php'); 
-    exit(); 
-}
-
-//define page title
-$title = 'Members Page';
-
-//include header template
-require('layout/header.php'); 
+<?php
+include 'connection.php'; 
+   if (isset($_GET['user'])) {
+   $user = $_GET['user'];
+   $get_user = $mysqli->query("SELECT * FROM users WHERE username = '$user'");
+   $user_data = $get_user->fetch_assoc();
+    } else {
+    header("Location: index.php");
+    }?>
+<!DOCTYPE html>
+<html>
+    <head>  
+ <meta charset="UTF-8">
+ <title><?php echo $user_data['username'] ?>'s Profile Settings</title>
+    </head> 
+ <body>        <a href="index.php">Home</a> | Back to <a href="profile.php?user=<?php echo $user_data['username'] ?>"><?php echo $user_data['username'] ?></a>'s Profile        
+ <h3>Update Profile Information</h3> 
+        <form method="post" action="update-profile-action.php?user=<?php echo $user_data['username'] ?>">            <label>Name:</label><br> 
+          <input type="text" name="fullname" value="<?php echo $user_data['full_name'] ?>" /><br> 
+          <label>Age:</label><br>
+          <input type="text" name="age" value="<?php echo $user_data['age'] ?>" /><br> 
+          <label>Gender:</label><br> 
+          <input type="text" name="gender" value="<?php echo $user_data['gender'] ?>" /><br>
+          <label>Address:</label><br>          
+          <input type="text" name="address" value="<?php echo $user_data['address'] ?>" /><br><br>  
+          <input type="submit" name="update_profile" value="Update Profile" />        
+ </form>   
+<?php
+  include 'connection.php';
+    if (isset($_POST['update_profile'])) {
+ $user = $_GET['user'];
+ $fullname = $_POST['fullname'];
+ $age = $_POST['age'];
+ $gender = $_POST['gender'];
+ $address = $_POST['address'];
+ $update_profile = $mysqli->query("UPDATE users SET full_name = '$fullname',
+                      gender = '$gender', age = $age, address = '$address'
+                      WHERE username = '$user'");
+     if ($update_profile) {
+    header("Location: profile.php?user=$user");
+     } else {
+   echo $mysqli->error;
+     }
+ }
 ?>
-
-<div class="container">
-
-	<div class="row">
-
-	    <div class="col-xs-12 col-sm-8 col-md-6 col-sm-offset-2 col-md-offset-3">
-			
-				<h2>Member only page - Welcome <?php echo htmlspecialchars($_SESSION['username'], ENT_QUOTES); ?></h2>
-				<p><a href='logout.php'>Logout</a></p>
-				<hr>
-
-		</div>
-	</div>
-
-
-</div>
-
-<?php 
-//include header template
-require('layout/footer.php'); 
-?>
+  
+ </body>
+</html>
